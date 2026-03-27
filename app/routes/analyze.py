@@ -22,6 +22,4 @@ async def analyze_csv(file: UploadFile = File(...)):
     df = read_csv(file.file)
 
     orchestrator = AgentOrchestrator()
-    results = orchestrator.run_pipeline(df)
-
-    return results
+    return orchestrator.run_pipeline(df)
