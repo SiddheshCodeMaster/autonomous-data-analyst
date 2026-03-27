@@ -13,10 +13,19 @@ class BaseAgent:
         Your goal:
         {self.goal}
 
-        Input:
+        STRICT INSTRUCTIONS:
+        - Do NOT give generic advice
+        - Use ONLY the provided data
+        - Be specific and data-driven
+        - Give bullet points
+
+        INPUT DATA:
         {input_text}
 
-        Provide structured output.
+        OUTPUT FORMAT:
+        - Key Findings:
+        - Issues:
+        - Recommendations:
         """
 
         response = call_llm(prompt)

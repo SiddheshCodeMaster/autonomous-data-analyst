@@ -20,9 +20,8 @@ def analyze_data(prompt: str):
 async def analyze_csv(file: UploadFile = File(...)):
 
     df = read_csv(file.file)
-    summary = get_basic_summary(df)
 
     orchestrator = AgentOrchestrator()
-    results = orchestrator.run_pipeline(summary)
+    results = orchestrator.run_pipeline(df)
 
-    return {"summary": summary, "agent_outputs": results}
+    return results
