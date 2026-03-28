@@ -1,7 +1,8 @@
 from fastapi import APIRouter, UploadFile, File
 from app.services.llm_service import call_llm
-from app.utils.file_handler import read_csv, get_basic_summary
+from app.utils.file_handler import load_file
 from app.services.agent_orchestrator import AgentOrchestrator
+
 
 router = APIRouter()
 
@@ -16,10 +17,13 @@ def analyze_data(prompt: str):
     return {"analysis": response["choices"][0]["message"]["content"]}
 
 
-@router.post("/analyze-csv")
-async def analyze_csv(file: UploadFile = File(...)):
+@router.post("/analyze-file")
+async def analyze_file(file: UploadFile = File(...)):
 
-    df = read_csv(file.file)
+    try:
+        df = load_file(file.file)
+    except Exception as e:
+        return {"error": str(e)}
 
     orchestrator = AgentOrchestrator()
     return orchestrator.run_pipeline(df)
