@@ -1,22 +1,40 @@
 import pandas as pd
 
 
-import pandas as pd
-
-
 def load_file(file):
-    import pandas as pd
 
-    filename = file.name if hasattr(file, "name") else file
+    # 🟢 CASE 1: FastAPI UploadFile
+    if hasattr(file, "filename") and hasattr(file, "file"):
+        filename = file.filename.lower()
 
-    if filename.endswith(".csv"):
-        return pd.read_csv(file, encoding="utf-8", errors="ignore")
+        if not filename:
+            raise ValueError("Filename is missing")
 
-    elif filename.endswith((".xlsx", ".xls")):
-        return pd.read_excel(file)
+        if filename.endswith(".csv"):
+            return pd.read_csv(file.file)
 
+        elif filename.endswith((".xlsx", ".xls")):
+            return pd.read_excel(file.file)
+
+        else:
+            raise ValueError("Unsupported file format")
+
+    # 🟢 CASE 2: CLI (string path)
+    elif isinstance(file, str):
+        filename = file.lower()
+
+        if filename.endswith(".csv"):
+            return pd.read_csv(file)
+
+        elif filename.endswith((".xlsx", ".xls")):
+            return pd.read_excel(file)
+
+        else:
+            raise ValueError("Unsupported file format")
+
+    # 🔴 EVERYTHING ELSE
     else:
-        raise ValueError("Unsupported file format")
+        raise ValueError(f"Invalid file input type: {type(file)}")
 
 
 def get_basic_summary(df):
