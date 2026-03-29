@@ -28,7 +28,7 @@ async def analyze_file(file: UploadFile = File(...)):
     orchestrator = AgentOrchestrator()
     results = orchestrator.run_pipeline(df)
 
-    pdf_path = generate_pdf_report(results["steps"])
+    pdf_path = generate_pdf_report(results["steps"], results["charts"])
 
     report_id = str(uuid.uuid4())
 

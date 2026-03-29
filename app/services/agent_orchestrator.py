@@ -10,6 +10,7 @@ from app.utils.data_tools import (
     get_column_info,
 )
 
+from app.utils.chart_generator import generate_charts
 from app.utils.logger import get_logger
 
 
@@ -25,29 +26,31 @@ class AgentOrchestrator:
 
     def run_pipeline(self, df):
 
-        self.logger.info("Pipeline started")
+        self.logger.info("🚀 Pipeline started")
 
         steps = []
+        charts = []
 
         try:
             # =========================
             # STEP 0: DATA PREPARATION
             # =========================
-            self.logger.info("Extracting dataset features")
+            self.logger.info("📊 Extracting dataset features")
 
             column_info = get_column_info(df)
             sample_data = get_sample_data(df)
             numeric_summary = get_numeric_summary(df)
             correlation = get_correlation(df)
+            missing_values = df.isnull().sum().to_dict()
 
             # =========================
             # STEP 1: DATA CLEANING
             # =========================
-            self.logger.info("Running Data Cleaner Agent")
+            self.logger.info("🧹 Running Data Cleaner Agent")
 
             cleaner_input = {
                 "column_info": column_info,
-                "missing_values": df.isnull().sum().to_dict(),
+                "missing_values": missing_values,
             }
 
             cleaner_output = self.cleaner.run(str(cleaner_input))
@@ -63,7 +66,7 @@ class AgentOrchestrator:
             # =========================
             # STEP 2: EDA
             # =========================
-            self.logger.info("Running EDA Agent")
+            self.logger.info("📈 Running EDA Agent")
 
             eda_input = {
                 "column_info": column_info,
@@ -83,9 +86,22 @@ class AgentOrchestrator:
             )
 
             # =========================
+            # STEP 2.5: CHART GENERATION 🔥
+            # =========================
+            self.logger.info("📊 Generating charts")
+
+            try:
+                charts = generate_charts(df)
+                self.logger.info(f"Generated {len(charts)} charts")
+
+            except Exception as chart_error:
+                self.logger.warning(f"Chart generation failed: {str(chart_error)}")
+                charts = []
+
+            # =========================
             # STEP 3: INSIGHTS
             # =========================
-            self.logger.info("Running Insight Agent")
+            self.logger.info("💡 Running Insight Agent")
 
             insight_input = {
                 "eda_output": eda_output,
@@ -103,14 +119,15 @@ class AgentOrchestrator:
             )
 
             # =========================
-            # STEP 4: FINAL REPORT (🔥 NEW)
+            # STEP 4: FINAL REPORT
             # =========================
-            self.logger.info("Generating Final Report")
+            self.logger.info("📄 Generating Final Report")
 
             report_input = {
                 "cleaning": cleaner_output,
                 "eda": eda_output,
                 "insights": insight_output,
+                "note": "Generate a structured, professional consulting-style report",
             }
 
             report_output = self.report.run(str(report_input))
@@ -123,12 +140,12 @@ class AgentOrchestrator:
                 }
             )
 
-            self.logger.info("Pipeline completed successfully")
+            self.logger.info("✅ Pipeline completed successfully")
 
-            return {"steps": steps, "report": report_output}
+            return {"steps": steps, "report": report_output, "charts": charts}
 
         except Exception as e:
-            self.logger.error(f"Pipeline failed: {str(e)}")
+            self.logger.error(f"❌ Pipeline failed: {str(e)}")
 
             steps.append(
                 {
@@ -138,4 +155,4 @@ class AgentOrchestrator:
                 }
             )
 
-            return {"steps": steps}
+            return {"steps": steps, "charts": [], "report": None}
